@@ -3,7 +3,9 @@ local runconfig = require "runconfig"
 
 skynet.start(function()
     -- 初始化
-    skynet.error("[start main]" .. runconfig.node1.gateway[1].port)
+    print("[main]" .. runconfig.node1.gateway[1].port)
+
+    skynet.newservice("gateway", "gateway", 1) -- 1可以索引runconfig中gateway[1]
 
     -- 退出自身
     skynet.exit()

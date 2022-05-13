@@ -20,10 +20,10 @@ function player()
         playerid = nil,
         -- agent = nil,
         conn = nil,
-        x,
-        y,
-        z,
-        e,
+        x = 0,
+        y = 0,
+        z = 0,
+        e = 0,
     }
 end
 
@@ -47,7 +47,7 @@ local str_unpack = function(msgstr)
 end
 
 local str_pack = function(msg)
-    return msg[1] .. "|" .. table.concat(msg, ",", 2) .. "\n"
+    return msg[1] .. "|" .. table.concat(msg, ",", 2) .. ",\n"
 end
 
 local Send = function(fd, msg) 
@@ -66,7 +66,17 @@ local disconnect = function(fd)
     if not playerid then
         return
     else
-        print("玩家" .. playerid .. "销毁")
+        print("玩家" .. playerid .. "断开连接")
+
+        local msg = {"Leave"}
+        table.insert(msg, conns[fd].playerid)
+        -- 通知其他玩家此玩家离开
+        for _fd, _ in pairs(conns) do
+            if fd ~= _fd then
+                Send(_fd, msg)
+            end
+        end
+
         conns[fd] = nil
         players[playerid] = nil
     end
@@ -114,6 +124,13 @@ local Enter = function(fd, msg)
 end
 
 local Move = function(fd, msg)
+    local desc = msg[2]
+    local p = players[desc]
+    p.x = msg[3]
+    p.y = msg[4]
+    p.z = msg[5]
+    p.e = msg[6]
+
     -- 通知其他玩家
     for _fd, _ in pairs(conns) do
         if fd ~= _fd then
@@ -122,11 +139,32 @@ local Move = function(fd, msg)
     end
 end
 
+local Leave = function(fd)
+    local msg = {"Leave"}
+    table.insert(msg, conns[fd].playerid)
+    -- 通知其他玩家此玩家离开
+    for _fd, _ in pairs(conns) do
+        if fd ~= _fd then
+            Send(_fd, msg)
+        end
+    end
+end
+
+local Attack = function(fd, msg)
+    -- 通知其他玩家
+    for _fd, _ in pairs(conns) do
+        if fd ~= _fd then
+            Send(_fd, msg) 
+        end
+    end
+end
 
 local api = {
     ["Enter"] = Enter,
     ["List"] = List,
     ["Move"] = Move,
+    ["Leave"] = Leave, -- 客户端主动下线
+    ["Attack"] = Attack,
 }
 
 

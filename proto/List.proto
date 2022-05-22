@@ -1,0 +1,13 @@
+
+message Element{
+	optional string desc = 1;
+	optional float x = 2;
+	optional float y = 3;
+	optional float z = 4;
+	optional float e = 5;
+}
+
+
+message List{
+    repeated Element element = 1;
+}

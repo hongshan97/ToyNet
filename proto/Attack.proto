@@ -1,0 +1,4 @@
+message Attack{
+	optional string desc = 1;
+	optional float e = 2;
+}
